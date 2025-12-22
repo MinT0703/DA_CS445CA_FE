@@ -1,0 +1,370 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Customer.master.cs" Inherits="BestFoodRestaurant.MasterPages.Customer" %>
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+        <asp:ContentPlaceHolder ID="TitleContent" runat="server">BestFood</asp:ContentPlaceHolder>
+    </title>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <link rel="stylesheet" href="~/Assets/css/site.css" />
+
+    <asp:ContentPlaceHolder ID="Styles" runat="server" />
+    <style>
+        /* Chat Widget Styles */
+        .chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .chat-toggle {
+            width: 60px;
+            height: 60px;
+            background: #e74c3c;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s;
+            position: relative;
+        }
+
+            .chat-toggle:hover {
+                transform: scale(1.1);
+            }
+
+            .chat-toggle .badge {
+                position: absolute;
+                top: 0;
+                right: 0;
+                background: #2c3e50;
+                color: white;
+                font-size: 11px;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 2px solid #fff;
+            }
+
+        .chat-panel {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 350px;
+            height: 450px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        .chat-header {
+            background: #e74c3c;
+            color: #fff;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .msg {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+            .msg.bot {
+                background: #fff;
+                border: 1px solid #eee;
+                align-self: flex-start;
+                border-bottom-left-radius: 2px;
+            }
+
+            .msg.user {
+                background: #e74c3c;
+                color: white;
+                align-self: flex-end;
+                border-bottom-right-radius: 2px;
+            }
+
+        .chat-input {
+            padding: 10px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            background: #fff;
+        }
+
+            .chat-input input {
+                flex: 1;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 20px;
+                outline: none;
+            }
+
+            .chat-input .send {
+                background: none;
+                border: none;
+                color: #e74c3c;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+        @media (max-width: 480px) {
+            .chat-panel {
+                width: 90vw;
+                right: -10px;
+                bottom: 70px;
+                height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <header class="header">
+            <div class="container">
+                <div class="logo">Best<span>Food</span></div>
+                <nav class="nav" id="nav">
+                    <asp:HyperLink ID="lnkHome" runat="server" NavigateUrl="~/Pages/Customer/Default.aspx">Trang chủ</asp:HyperLink>
+                    <asp:HyperLink ID="lnkMenu" runat="server" NavigateUrl="~/Pages/Customer/Menu.aspx">Thực đơn</asp:HyperLink>
+                    <asp:HyperLink ID="lnkCart" runat="server" NavigateUrl="~/Pages/Customer/Cart.aspx">Giỏ hàng</asp:HyperLink>
+                    <asp:HyperLink ID="lnkAbout" runat="server" NavigateUrl="~/Pages/Customer/AboutUs.aspx">Giới thiệu</asp:HyperLink>
+                    <asp:HyperLink ID="lnkContact" runat="server" NavigateUrl="~/Pages/Customer/Contact.aspx">Liên hệ</asp:HyperLink>
+                    <asp:HyperLink ID="lnkBooking" runat="server" NavigateUrl="~/Pages/Customer/Booking.aspx">Đặt bàn</asp:HyperLink>
+
+                    <div class="auth-section" id="authSection" runat="server">
+                        <asp:HyperLink ID="lnkLogin" runat="server" NavigateUrl="~/Pages/Customer/Login.aspx" CssClass="nav-link">Đăng nhập</asp:HyperLink>
+                        <asp:HyperLink ID="lnkRegister" runat="server" NavigateUrl="~/Pages/Customer/Register.aspx" CssClass="nav-link">Đăng ký</asp:HyperLink>
+
+                        <asp:Panel ID="pnlLoggedIn" runat="server" Visible="false" CssClass="user-info" Style="display: flex; align-items: center; gap: 15px;">
+
+                            <asp:HyperLink ID="lnkProfile" runat="server" NavigateUrl="~/Pages/Customer/AccountDetail.aspx" ToolTip="Tài khoản của tôi" Style="text-decoration: none; color: #333; display: flex; align-items: center;">
+            <div style="width: 35px; height: 35px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid #e74c3c;">
+                <i class="fas fa-user" style="color: #555; font-size: 18px;"></i>
+            </div>
+                            </asp:HyperLink>
+
+                            <asp:LinkButton ID="lnkLogout" runat="server" OnClick="lnkLogout_Click" Style="font-size: 14px; font-weight: 600; color: #666; text-decoration: none;">
+            <i class="fas fa-sign-out-alt"></i>
+                            </asp:LinkButton>
+                        </asp:Panel>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+        </main>
+
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-column">
+                        <h3>BestFood</h3>
+                        <p>Phục vụ đam mê ẩm thực từ 2010. Chúng tôi cam kết mang đến trải nghiệm ăn uống tốt nhất.</p>
+                        <div class="social-icons">
+                            <a href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fab fa-pinterest"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="footer-column">
+                        <h3>Liên kết nhanh</h3>
+                        <ul>
+                            <li>
+                                <asp:HyperLink ID="lnkFooterHome" runat="server" NavigateUrl="~/Pages/Customer/Default.aspx">Trang chủ</asp:HyperLink></li>
+                            <li>
+                                <asp:HyperLink ID="lnkFooterMenu" runat="server" NavigateUrl="~/Pages/Customer/Menu.aspx">Thực đơn</asp:HyperLink></li>
+                            <li>
+                                <asp:HyperLink ID="lnkFooterAbout" runat="server" NavigateUrl="~/Pages/Customer/AboutUs.aspx">Giới thiệu</asp:HyperLink></li>
+                            <li>
+                                <asp:HyperLink ID="lnkFooterContact" runat="server" NavigateUrl="~/Pages/Customer/Contact.aspx">Liên hệ</asp:HyperLink></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-column">
+                        <h3>Thông tin liên hệ</h3>
+                        <ul>
+                            <li><i class="fas fa-map-marker-alt"></i>123 Đường Food, TP.HCM</li>
+                            <li><i class="fas fa-phone"></i>(028) 1234 5678</li>
+                            <li><i class="fas fa-envelope"></i>info@bestfood.com</li>
+                            <li><i class="fas fa-clock"></i>Thứ 2 - CN: 10h - 22h</li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-column">
+                        <h3>Bản tin</h3>
+                        <p>Đăng ký để nhận ưu đãi và tin tức mới nhất.</p>
+                        <div class="newsletter">
+                            <asp:TextBox ID="txtNewsletter" runat="server" placeholder="Email của bạn" CssClass="newsletter-input"></asp:TextBox>
+                            <asp:Button ID="btnSubscribe" runat="server" Text="Đăng ký" CssClass="btn btn-newsletter" OnClick="btnSubscribe_Click" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-bottom">
+                    <p>&copy; <%= DateTime.Now.Year %> BestFood. Mọi quyền được bảo lưu.</p>
+                </div>
+            </div>
+        </footer>
+    </form>
+    <div class="chat-widget" id="chatWidgetRoot" aria-live="polite">
+        <button class="chat-toggle" id="chatToggle" title="Hỗ trợ" type="button">
+            <i class="fas fa-comments" style="font-size: 24px;"></i>
+            <span class="badge" id="chatBadge" style="display: none">0</span>
+        </button>
+
+        <div class="chat-panel" id="chatPanel" style="display: none">
+            <div class="chat-header">
+                <div class="chat-mini">
+                    <strong class="title">Trợ Lý AI</strong>
+                </div>
+                <button class="close-btn" id="chatClose" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">&times;</button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages"></div>
+
+            <div class="chat-input">
+                <input id="chatInput" placeholder="Gõ tin nhắn..." />
+                <button class="send" id="chatSend" type="button"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        (function () {
+            const KEY_CHAT_DATA = 'bestfood_chat_history_v2';
+            const KEY_OPEN_STATE = 'bestfood_chat_open_state';
+
+            const root = document.getElementById('chatWidgetRoot');
+            if (!root) return;
+
+            const toggle = document.getElementById('chatToggle');
+            const panel = document.getElementById('chatPanel');
+            const closeBtn = document.getElementById('chatClose');
+            const messagesEl = document.getElementById('chatMessages');
+            const input = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('chatSend');
+            const badge = document.getElementById('chatBadge');
+
+            function loadMessages() {
+                try { return JSON.parse(sessionStorage.getItem(KEY_CHAT_DATA) || '[]'); } catch { return []; }
+            }
+            function saveMessages(arr) { sessionStorage.setItem(KEY_CHAT_DATA, JSON.stringify(arr)); }
+            function setOpen(v) { sessionStorage.setItem(KEY_OPEN_STATE, v ? '1' : '0'); }
+            function getOpen() { return sessionStorage.getItem(KEY_OPEN_STATE) === '1'; }
+
+            function scrollToBottom() { messagesEl.scrollTop = messagesEl.scrollHeight; }
+
+            function render() {
+                const msgs = loadMessages();
+                messagesEl.innerHTML = msgs.map(m => {
+                    const cls = m.from === 'user' ? 'msg user' : 'msg bot';
+                    return `<div class="${cls}">${escapeHtml(m.text)}</div>`;
+                }).join('');
+                scrollToBottom();
+            }
+
+            function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+            // --- HÀM GỬI TIN NHẮN (ĐÃ CẬP NHẬT) ---
+            function sendMessage() {
+                const txt = (input.value || '').trim();
+                if (!txt) return;
+
+                // 1. Lấy lịch sử cũ (Lấy 6 tin gần nhất để tiết kiệm token nhưng đủ ngữ cảnh)
+                const history = loadMessages().slice(-6);
+
+                addMessage('user', txt);
+                input.value = '';
+
+                const typingId = 'typing_' + Date.now();
+                addTypingEffect(typingId);
+
+                // 2. Gửi cả tin nhắn mới + lịch sử về Server
+                fetch('/Pages/Customer/ChatBot.aspx/GetBotResponse', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                    body: JSON.stringify({
+                        userMessage: txt,
+                        history: history // <--- QUAN TRỌNG: Gửi kèm lịch sử
+                    })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        removeElement(typingId);
+                        const botReply = data.d || "Xin lỗi, bot không phản hồi.";
+                        addMessage('bot', botReply);
+                    })
+                    .catch(err => {
+                        removeElement(typingId);
+                        console.error(err);
+                        addMessage('bot', 'Lỗi kết nối.');
+                    });
+            }
+
+            function addMessage(from, text) {
+                const msgs = loadMessages();
+                msgs.push({ from, text, t: Date.now() });
+                saveMessages(msgs);
+                render();
+            }
+
+            function addTypingEffect(id) {
+                messagesEl.insertAdjacentHTML('beforeend', `<div class="msg bot" id="${id}" style="background:#f1f1f1; color:#777; font-style:italic;"><i class="fas fa-ellipsis-h"></i></div>`);
+                scrollToBottom();
+            }
+            function removeElement(id) { const el = document.getElementById(id); if (el) el.remove(); }
+
+            function openPanel() { panel.style.display = 'flex'; setOpen(true); badge.style.display = 'none'; scrollToBottom(); }
+            function closePanel() { panel.style.display = 'none'; setOpen(false); }
+
+            if (getOpen()) openPanel(); else closePanel();
+            render();
+
+            toggle.addEventListener('click', (e) => { e.preventDefault(); if (panel.style.display !== 'none') closePanel(); else openPanel(); });
+            closeBtn.addEventListener('click', (e) => { e.preventDefault(); closePanel(); });
+            sendBtn.addEventListener('click', (e) => { e.preventDefault(); sendMessage(); });
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
+        })();
+    </script>
+    <asp:ContentPlaceHolder ID="Scripts" runat="server" />
+</body>
+</html>

@@ -1,0 +1,1 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ChatBot.aspx.cs" Inherits="BestFoodRestaurant.Pages.Customer.ChatBot" %>
