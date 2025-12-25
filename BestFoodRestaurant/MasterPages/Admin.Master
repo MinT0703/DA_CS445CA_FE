@@ -1,0 +1,296 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Admin.master.cs" Inherits="BestFoodRestaurant.MasterPages.Admin" %>
+
+<!DOCTYPE html>
+<html lang="vi">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+        <asp:ContentPlaceHolder ID="TitleContent" runat="server">Quản trị - BestFood</asp:ContentPlaceHolder>
+    </title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/Assets/css/site.css" />
+
+    <style>
+        /* === CSS Cấu trúc Layout Admin === */
+        :root {
+            --primary-color: #e74c3c;
+            --sidebar-bg: #2f3f49;
+            --sidebar-text: #cbd8de;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        body {
+            background-color: #f7f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+        }
+
+        /* === Header Styles (Đã tối ưu hóa khoảng cách) === */
+        .header {
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            width: 100%;
+        }
+
+        .header .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            padding: 0 20px;
+            box-sizing: border-box;
+            
+            /* Tạo khoảng cách an toàn giữa Logo và Menu để không bị dính */
+            gap: 40px; 
+        }
+
+        /* Logo */
+        .logo {
+            font-weight: 800;
+            font-size: 24px;
+            color: #333;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            white-space: nowrap; /* Không xuống dòng */
+            flex-shrink: 0;      /* Không bị co lại khi màn hình nhỏ */
+        }
+
+        .logo span.brand { color: var(--primary-color); }
+        
+        .logo span.slogan {
+            font-size: 14px;
+            color: #7f8c8d;
+            font-weight: normal;
+            margin-left: 8px;
+            padding-left: 8px;
+            border-left: 1px solid #ccc;
+            line-height: 1;
+            display: inline-block;
+        }
+
+        /* Menu Navigation */
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 20px; /* Khoảng cách đều giữa các link */
+            margin-left: auto; /* Đẩy menu sang phải */
+            flex-wrap: nowrap;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .nav a:hover, .nav a.active {
+            color: var(--primary-color);
+        }
+
+        .btn-logout {
+            color: #e74c3c !important;
+            border: 1px solid #fadbd8;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            background: #fff;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .btn-logout:hover {
+            background: #e74c3c;
+            color: #fff !important;
+        }
+
+        /* === Admin Layout Grid === */
+        .admin-container {
+            max-width: 1200px;
+            margin: 24px auto;
+            padding: 0 20px 40px;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* Sidebar Styles */
+        .admin-sidebar {
+            background: var(--sidebar-bg);
+            color: #fff;
+            border-radius: 12px;
+            padding: 18px;
+            min-height: calc(100vh - 120px);
+            position: sticky;
+            top: 90px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        }
+
+        .sidebar-title {
+            margin: 0 0 16px 0;
+            color: #f3fafc;
+            font-size: 18px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .admin-sidebar a {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            color: var(--sidebar-text);
+            padding: 10px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-bottom: 6px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .admin-sidebar a i { width: 20px; text-align: center; }
+
+        .admin-sidebar a:hover, .admin-sidebar a.active {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Main Content Styles */
+        .card-panel {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        /* Utility Classes */
+        .muted { color: #6b7280; }
+        .small { font-size: 13px; }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .btn-small { padding: 6px 12px; font-size: 13px; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .admin-container { grid-template-columns: 1fr; }
+            .admin-sidebar { position: static; min-height: auto; margin-bottom: 20px; }
+            
+            /* Trên mobile, ẩn bớt slogan dài nếu cần */
+            .logo span.slogan { display: none; }
+        }
+    </style>
+
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <header class="header">
+            <div class="container">
+                <a href="/Pages/Admin/Dashboard.aspx" class="logo">
+                    Best<span class="brand">Food</span>
+                    <span class="slogan">Admin Portal</span>
+                </a>
+
+                <nav class="nav">
+                    <asp:HyperLink ID="lnkHeaderDash" runat="server" NavigateUrl="~/Pages/Admin/Dashboard.aspx">Dashboard</asp:HyperLink>
+                    <asp:HyperLink ID="lnkHeaderAccount" runat="server" NavigateUrl="~/Pages/Admin/Accounts.aspx">Tài Khoản</asp:HyperLink>
+                    <asp:HyperLink ID="lnkHeaderMenu" runat="server" NavigateUrl="~/Pages/Admin/Menu.aspx">Món Ăn</asp:HyperLink>
+                    <asp:HyperLink ID="lnkHeaderOrder" runat="server" NavigateUrl="~/Pages/Admin/Orders.aspx">Đơn Hàng</asp:HyperLink>
+                    
+                    <asp:HyperLink ID="lnkHeaderPromo" runat="server" NavigateUrl="~/Pages/Admin/Promos.aspx">Voucher</asp:HyperLink>
+                    
+                    <asp:LinkButton ID="lnkLogout" runat="server" OnClick="lnkLogout_Click" CssClass="btn-logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</asp:LinkButton>
+                </nav>
+            </div>
+        </header>
+
+        <div class="admin-container">
+
+            <aside class="admin-sidebar">
+                <h3 class="sidebar-title">Quản trị</h3>
+
+                <asp:HyperLink ID="lnkSideDash" runat="server" NavigateUrl="~/Pages/Admin/Dashboard.aspx">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </asp:HyperLink>
+
+                <asp:HyperLink ID="lnkSideAccount" runat="server" NavigateUrl="~/Pages/Admin/Accounts.aspx">
+                    <i class="fas fa-users"></i> Quản lý Tài khoản
+                </asp:HyperLink>
+
+                <asp:HyperLink ID="lnkSideMenu" runat="server" NavigateUrl="~/Pages/Admin/Menu.aspx">
+                    <i class="fas fa-utensils"></i> Quản lý Món ăn
+                </asp:HyperLink>
+
+                <asp:HyperLink ID="lnkSideOrder" runat="server" NavigateUrl="~/Pages/Admin/Orders.aspx">
+                    <i class="fas fa-receipt"></i> Quản lý Đơn hàng
+                </asp:HyperLink>
+
+                <asp:HyperLink ID="lnkSidePromo" runat="server" NavigateUrl="~/Pages/Admin/Promos.aspx">
+                    <i class="fas fa-tag"></i> Quản lý Khuyến mãi
+                </asp:HyperLink>
+
+                <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
+
+                <a href="/" target="_blank" style="color: #7f8c8d; font-size: 13px;">
+                    <i class="fas fa-external-link-alt"></i> Xem Trang chủ
+                </a>
+            </aside>
+
+            <section class="main-content">
+                <asp:ContentPlaceHolder ID="MainContent" runat="server">
+                </asp:ContentPlaceHolder>
+            </section>
+
+        </div>
+    </form>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Lấy đường dẫn hiện tại
+            var path = window.location.pathname.toLowerCase();
+
+            // Map đường dẫn với ID của các Link trong Sidebar
+            var map = {
+                'dashboard.aspx': '<%= lnkSideDash.ClientID %>',
+                'accounts.aspx': '<%= lnkSideAccount.ClientID %>',
+                'menu.aspx': '<%= lnkSideMenu.ClientID %>',
+                'orders.aspx': '<%= lnkSideOrder.ClientID %>',
+                'promos.aspx': '<%= lnkSidePromo.ClientID %>'
+            };
+
+            // Tìm key trong path và add class active
+            for (var key in map) {
+                if (path.indexOf(key) !== -1) {
+                    var el = document.getElementById(map[key]);
+                    if (el) el.classList.add('active');
+                    break;
+                }
+            }
+        });
+    </script>
+
+    <asp:ContentPlaceHolder ID="Scripts" runat="server">
+    </asp:ContentPlaceHolder>
+</body>
+</html>

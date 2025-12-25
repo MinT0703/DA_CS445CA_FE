@@ -15,10 +15,10 @@ namespace BestFoodRestaurant.Pages.Customer
         {
             if (!IsPostBack)
             {
-                // 1. Nếu đã có Session (đang đăng nhập) -> Về trang chủ
+                // 1. Nếu đã có Session (đang đăng nhập)
                 if (Session["CustomerID"] != null)
                 {
-                    Response.Redirect("Default.aspx");
+                    RedirectUserBasedOnRole();
                 }
                 // 2. Nếu chưa có Session, kiểm tra Cookie "Ghi nhớ"
                 else
@@ -53,7 +53,7 @@ namespace BestFoodRestaurant.Pages.Customer
                             {
                                 string dbPassHash = reader["password_hash"].ToString();
 
-                                // Kiểm tra mật khẩu (Demo so sánh chuỗi trần)
+                                // Kiểm tra mật khẩu
                                 if (password == dbPassHash)
                                 {
                                     // 1. Lưu thông tin vào Session
@@ -62,15 +62,14 @@ namespace BestFoodRestaurant.Pages.Customer
                                     // 2. Xử lý "Ghi nhớ tôi"
                                     if (chkRemember.Checked)
                                     {
-                                        // Tạo Cookie lưu UserID, tồn tại trong 30 ngày
                                         HttpCookie cookie = new HttpCookie("BestFoodLogin");
                                         cookie.Values["UserID"] = reader["user_id"].ToString();
                                         cookie.Expires = DateTime.Now.AddDays(30);
                                         Response.Cookies.Add(cookie);
                                     }
 
-                                    // Chuyển hướng
-                                    Response.Redirect("Default.aspx");
+                                    // 3. Chuyển hướng
+                                    RedirectUserBasedOnRole();
                                 }
                                 else
                                 {
@@ -99,7 +98,6 @@ namespace BestFoodRestaurant.Pages.Customer
             {
                 string userId = cookie.Values["UserID"];
 
-                // Xác thực lại UserID từ Cookie với Database để bảo mật
                 using (SqlConnection conn = new SqlConnection(connStr))
                 {
                     string sql = "SELECT user_id, full_name, phone, email, role_id FROM users WHERE user_id = @uid AND status = 'ACTIVE'";
@@ -113,19 +111,36 @@ namespace BestFoodRestaurant.Pages.Customer
                             {
                                 if (reader.Read())
                                 {
-                                    // Tự động đăng nhập lại
                                     SetUserSession(reader);
-                                    Response.Redirect("Default.aspx");
+                                    RedirectUserBasedOnRole();
                                 }
                             }
                         }
-                        catch { /* Bỏ qua lỗi nếu cookie sai/cũ */ }
+                        catch { /* Bỏ qua lỗi cookie cũ/sai */ }
                     }
                 }
             }
         }
 
-        // Hàm chung để set Session
+        // Hàm điều hướng tập trung (Dùng chung cho cả Login, PageLoad, Cookie)
+        private void RedirectUserBasedOnRole()
+        {
+            // Lấy RoleID từ Session (đã được set trước đó)
+            string roleId = Session["RoleID"] != null ? Session["RoleID"].ToString() : "";
+
+            if (roleId == "5") // ADMIN
+            {
+                Response.Redirect("~/Pages/Admin/Dashboard.aspx", false);
+                // dùng false để tránh lỗi ThreadAbortException
+                Context.ApplicationInstance.CompleteRequest();
+            }
+            else // KHÁCH HÀNG
+            {
+                Response.Redirect("~/Pages/Customer/Default.aspx", false);
+                Context.ApplicationInstance.CompleteRequest();
+            }
+        }
+
         private void SetUserSession(SqlDataReader reader)
         {
             Session["CustomerID"] = reader["user_id"];
